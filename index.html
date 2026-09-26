@@ -31,12 +31,16 @@
         <p id="error-msg" style="color: red; margin-top: 10px;"></p>
     </div>
 
-    <!-- Firebase SDKs -->
+    <!-- 1. Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <!-- Ye line Firestore ke liye hai (Naya add ki hai) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     
-    <!-- Aapki Files -->
-    <script src="firebase-config.js?v=6"></script>
-<script src="app.js?v=6"></script>
+    <!-- 2. Aapki Config File -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- 3. Aapki App Logic File -->
+    <script src="app.js"></script>
 </body>
 </html>
