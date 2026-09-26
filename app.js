@@ -24,6 +24,7 @@ const translations = {
 
 // Variable to track Login/Signup mode
 let isLoginMode = true; 
+const db = firebase.firestore(); // Firestore initialize
 
 // 2. Language Change karne ka function
 function setLanguage(lang) {
@@ -104,13 +105,16 @@ document.getElementById('auth-form').addEventListener('submit', function(e) {
         // === SIGN UP LOGIC ===
         firebase.auth().createUserWithEmailAndPassword(email, password)
             .then((userCredential) => {
-                // Account banne par Chat Screen par bhejein
-                window.location.href = "chat.html";
-            })
-            .catch((error) => {
-                errorMsg.style.color = "red";
-                errorMsg.innerText = "Error: " + error.message;
-            });
+    // User ka data Firestore mein save karein
+    const user = userCredential.user;
+    db.collection('users').doc(user.uid).set({
+        email: user.email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        // Data save hone ke baad chat screen par bhejein
+        window.location.href = "chat.html";
+    });
+})
     }
 });
 
