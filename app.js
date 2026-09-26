@@ -1,5 +1,5 @@
 /* ==========================================================
-   HOWI CHAT - Authentication Logic
+   HOWI CHAT - Authentication Logic (Fixed Version)
    ========================================================== */
 
 const translations = {
@@ -52,13 +52,14 @@ document.getElementById('signup-link').addEventListener('click', function(e) {
     setLanguage(lang);
 });
 
-document.getElementById('auth-form').addEventListener('submit', function(e) {
+document.getElementById('auth-form').addEventListener('submit', async function(e) {
     e.preventDefault();
 
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const errorMsg = document.getElementById('error-msg');
     const submitBtn = document.getElementById('login-btn');
+    const currentLang = document.body.classList.contains('rtl') ? 'ur' : 'en';
 
     errorMsg.innerText = "";
     
@@ -73,32 +74,56 @@ document.getElementById('auth-form').addEventListener('submit', function(e) {
     submitBtn.innerText = "Please wait...";
 
     if (isLoginMode) {
-        // LOGIN
-        firebase.auth().signInWithEmailAndPassword(email, password)
-            .catch((error) => {
-                errorMsg.style.color = "#e74c3c";
-                errorMsg.innerText = getErrorMessage(error.code);
-                submitBtn.disabled = false;
-                setLanguage(document.body.classList.contains('rtl') ? 'ur' : 'en');
-            });
-    } else {
-        // SIGNUP
-        firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-                // Fire and forget - background save
-                firebase.firestore().collection('users').doc(user.uid).set({
+        // ============ LOGIN ============
+        try {
+            const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+            const user = userCredential.user;
+            
+            // Check karo ke Firestore mein user hai ya nahi
+            const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+            
+            if (!userDoc.exists) {
+                // Agar nahi hai to banao
+                await firebase.firestore().collection('users').doc(user.uid).set({
                     email: user.email,
                     uid: user.uid,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }).catch(err => console.log("DB save error:", err));
-            })
-            .catch((error) => {
-                errorMsg.style.color = "#e74c3c";
-                errorMsg.innerText = getErrorMessage(error.code);
-                submitBtn.disabled = false;
-                setLanguage(document.body.classList.contains('rtl') ? 'ur' : 'en');
+                });
+            }
+            
+            // Ab chat page pe jao
+            window.location.href = "chat.html";
+            
+        } catch (error) {
+            errorMsg.style.color = "#e74c3c";
+            errorMsg.innerText = getErrorMessage(error.code);
+            submitBtn.disabled = false;
+            setLanguage(currentLang);
+        }
+    } else {
+        // ============ SIGNUP ============
+        try {
+            // Step 1: Firebase Auth mein account banao
+            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+            const user = userCredential.user;
+            
+            // Step 2: Firestore mein user ka data save karo (AWAIT ke saath)
+            await firebase.firestore().collection('users').doc(user.uid).set({
+                email: user.email,
+                uid: user.uid,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
+            
+            // Step 3: Data save hone ke baad chat page pe bhejo
+            window.location.href = "chat.html";
+            
+        } catch (error) {
+            console.error("Signup error:", error);
+            errorMsg.style.color = "#e74c3c";
+            errorMsg.innerText = getErrorMessage(error.code);
+            submitBtn.disabled = false;
+            setLanguage(currentLang);
+        }
     }
 });
 
@@ -111,16 +136,37 @@ function getErrorMessage(code) {
         'auth/wrong-password': 'Incorrect password. Please try again.',
         'auth/invalid-credential': 'Invalid email or password.',
         'auth/too-many-requests': 'Too many attempts. Please try later.',
-        'auth/network-request-failed': 'Network error. Check your internet.'
+        'auth/network-request-failed': 'Network error. Check your internet.',
+        'permission-denied': 'Database permission denied. Please check Firebase rules.'
     };
     return messages[code] || 'Something went wrong. Please try again.';
 }
 
-// Auto-redirect if already logged in
-firebase.auth().onAuthStateChanged((user) => {
+// ============ AUTO REDIRECT IF LOGGED IN ============
+firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
-        window.location.href = "chat.html";
+        // Check karo ke Firestore mein user ka data hai ya nahi
+        try {
+            const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+            
+            if (!userDoc.exists) {
+                // Agar nahi hai to banao (purane users ke liye)
+                await firebase.firestore().collection('users').doc(user.uid).set({
+                    email: user.email,
+                    uid: user.uid,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            
+            // Ab chat page pe jao (agar pehle se chat page pe nahi ho)
+            if (window.location.pathname.indexOf('chat.html') === -1) {
+                window.location.href = "chat.html";
+            }
+        } catch (err) {
+            console.error("Auto redirect error:", err);
+        }
     }
 });
 
+// Start with English
 setLanguage('en');
