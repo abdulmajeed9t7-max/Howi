@@ -44,7 +44,7 @@ document.getElementById('signup-link').addEventListener('click', function(e) {
     }
 });
 
-// 4. Form Submit Logic
+// 4. Form Submit Logic (Sirf Authentication)
 document.getElementById('auth-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -57,9 +57,6 @@ document.getElementById('auth-form').addEventListener('submit', function(e) {
     if (isLoginMode) {
         // === LOGIN ===
         firebase.auth().signInWithEmailAndPassword(email, password)
-            .then(() => {
-                window.location.href = "chat.html";
-            })
             .catch((error) => {
                 errorMsg.style.color = "red";
                 errorMsg.innerText = "Error: " + error.message;
@@ -67,24 +64,19 @@ document.getElementById('auth-form').addEventListener('submit', function(e) {
     } else {
         // === SIGN UP ===
         firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                // User ka data Firestore mein save karein
-                const user = userCredential.user;
-                firebase.firestore().collection('users').doc(user.uid).set({
-                    email: user.email,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    window.location.href = "chat.html";
-                }).catch((dbError) => {
-                    console.log("DB Error: ", dbError);
-                    // Agar database save bhi na ho, phir bhi aage barhein
-                    window.location.href = "chat.html";
-                });
-            })
             .catch((error) => {
                 errorMsg.style.color = "red";
                 errorMsg.innerText = "Error: " + error.message;
             });
+    }
+});
+
+// 5. AUTO REDIRECT LOGIC (Sab se Zaroori)
+// Jab bhi user login ya signup karega, ye function khud chal kar Chat Screen khol dega
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        // User logged in hai, to Chat Screen par bhejein
+        window.location.href = "chat.html";
     }
 });
 
