@@ -44,7 +44,7 @@ document.getElementById('signup-link').addEventListener('click', function(e) {
     }
 });
 
-// 4. Form Submit Logic (Sirf Authentication, Database baad mein)
+// 4. Form Submit Logic
 document.getElementById('auth-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -67,9 +67,19 @@ document.getElementById('auth-form').addEventListener('submit', function(e) {
     } else {
         // === SIGN UP ===
         firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then(() => {
-                // Account ban gaya, ab foran aage barhein
-                window.location.href = "chat.html";
+            .then((userCredential) => {
+                // User ka data Firestore mein save karein
+                const user = userCredential.user;
+                firebase.firestore().collection('users').doc(user.uid).set({
+                    email: user.email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    window.location.href = "chat.html";
+                }).catch((dbError) => {
+                    console.log("DB Error: ", dbError);
+                    // Agar database save bhi na ho, phir bhi aage barhein
+                    window.location.href = "chat.html";
+                });
             })
             .catch((error) => {
                 errorMsg.style.color = "red";
