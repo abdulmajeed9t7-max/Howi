@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Howi Chat - Messages</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="lang-switch">
+            <button onclick="setLanguage('en')">English</button>
+            <button onclick="setLanguage('ur')">اردو</button>
+        </div>
+
+        <h1 id="app-title">Messages</h1>
+        <p>Welcome, <span id="user-email"></span></p>
+        
+        <p style="margin-top: 20px; color: #888;">(Yahan aapki doston ki list aayegi)</p>
+        <p style="margin-top: 10px; color: #888;">(Yahan chat messages aayenge)</p>
+
+        <button id="logout-btn" style="margin-top: 20px; background: #e74c3c; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">Logout</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+        // User ka email screen par dikhana aur check karna ke login hai ya nahi
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('user-email').innerText = user.email;
+            } else {
+                window.location.href = "index.html"; // Agar login nahi, to wapas login screen
+            }
+        });
+
+        // Logout ka logic
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => {
+                window.location.href = "index.html";
+            });
+        });
+    </script>
+</body>
+</html>
