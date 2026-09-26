@@ -6,14 +6,6 @@ const translations = {
 
 let isLoginMode = true;
 
-// Firestore Check (Agar load nahi hua to error na de)
-let db;
-if (typeof firebase.firestore !== 'undefined') {
-    db = firebase.firestore();
-} else {
-    console.log("Firestore load nahi hua, lekin app chalegi.");
-}
-
 // 2. Language Change Function
 function setLanguage(lang) {
     if (lang === 'ur') document.body.classList.add('rtl');
@@ -52,14 +44,14 @@ document.getElementById('signup-link').addEventListener('click', function(e) {
     }
 });
 
-// 4. Form Submit Logic
+// 4. Form Submit Logic (Sirf Authentication, Database baad mein)
 document.getElementById('auth-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const errorMsg = document.getElementById('error-msg');
-    errorMsg.innerText = "Processing..."; // User ko batayein ke kaam ho raha hai
+    errorMsg.innerText = "Processing... Please wait";
     errorMsg.style.color = "blue";
 
     if (isLoginMode) {
@@ -75,25 +67,9 @@ document.getElementById('auth-form').addEventListener('submit', function(e) {
     } else {
         // === SIGN UP ===
         firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-                
-                // Agar database load hai to data save karein
-                if (db) {
-                    db.collection('users').doc(user.uid).set({
-                        email: user.email,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }).then(() => {
-                        window.location.href = "chat.html";
-                    }).catch((dbError) => {
-                        errorMsg.style.color = "orange";
-                        errorMsg.innerText = "Account ban gaya, lekin database save nahi hua. Aage barh rahe hain...";
-                        setTimeout(() => { window.location.href = "chat.html"; }, 1500);
-                    });
-                } else {
-                    // Agar database load nahi hua, to phir bhi aage barhein
-                    window.location.href = "chat.html";
-                }
+            .then(() => {
+                // Account ban gaya, ab foran aage barhein
+                window.location.href = "chat.html";
             })
             .catch((error) => {
                 errorMsg.style.color = "red";
