@@ -1,6 +1,6 @@
 // Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSy...", // Aapki key yahan rahegi
+  apiKey: "AIzaSyAIfjFZMKhr3pXET3yFPBeWlvQcyRPPYE",
   authDomain: "howi-de267.firebaseapp.com",
   projectId: "howi-de267",
   storageBucket: "howi-de267.firebasestorage.app",
