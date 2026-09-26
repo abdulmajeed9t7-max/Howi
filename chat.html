@@ -8,7 +8,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Language Toggle -->
         <div class="lang-switch">
             <button onclick="setLanguage('en')">English</button>
             <button onclick="setLanguage('ur')">اردو</button>
@@ -25,75 +24,54 @@
         <button id="logout-btn" style="margin-top: 20px; background: #e74c3c; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">Logout</button>
     </div>
 
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    
-    <!-- Aapki Config File -->
     <script src="firebase-config.js"></script>
 
-    <!-- Chat Screen Ka Logic -->
     <script>
-        // 1. Translations Dictionary (Chat Screen ke liye)
         const chatTranslations = {
-            en: { title: "Messages", welcome: "Welcome", friends: "Friends List", logout: "Logout" },
-            ur: { title: "پیغامات", welcome: "خوش آمدید", friends: "دوستوں کی فہرست", logout: "لاگ آؤٹ" }
+            en: { title: "Messages", friends: "Friends List", logout: "Logout" },
+            ur: { title: "پیغامات", friends: "دوستوں کی فہرست", logout: "لاگ آؤٹ" }
         };
 
-        // 2. Language Change Function
         function setLanguage(lang) {
             if (lang === 'ur') document.body.classList.add('rtl');
             else document.body.classList.remove('rtl');
-
             document.getElementById('app-title').innerText = chatTranslations[lang].title;
             document.getElementById('friends-title').innerText = chatTranslations[lang].friends;
             document.getElementById('logout-btn').innerText = chatTranslations[lang].logout;
         }
-
-        // 3. Default Language Set Karein
         setLanguage('en');
 
-        // 4. Authentication Check aur Friends List Load Karna
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                // User ka email screen par dikhana
                 document.getElementById('user-email').innerText = user.email;
 
-                // Firestore se saare users nikalna
                 const db = firebase.firestore();
                 db.collection('users').onSnapshot((snapshot) => {
                     const usersList = document.getElementById('users-list');
-                    usersList.innerHTML = ""; // List clear karein
-
+                    usersList.innerHTML = "";
                     snapshot.forEach((doc) => {
                         const userData = doc.data();
-                        
-                        // Khud ko list mein na dikhayein
                         if (userData.email !== user.email) {
                             const li = document.createElement('li');
                             li.innerText = userData.email;
                             li.style.padding = "10px";
                             li.style.borderBottom = "1px solid #ccc";
                             li.style.cursor = "pointer";
-                            
-                            // Dost par click karne ka action
                             li.onclick = () => {
-                                alert("Aapne " + userData.email + " par click kiya! Ab hum chat screen banayenge.");
+                                alert("Aapne " + userData.email + " par click kiya!");
                             };
-                            
                             usersList.appendChild(li);
                         }
                     });
                 });
-
             } else {
-                // Agar login nahi hai, to wapas login screen par bhejein
                 window.location.href = "index.html";
             }
         });
 
-        // 5. Logout Logic
         document.getElementById('logout-btn').addEventListener('click', () => {
             firebase.auth().signOut().then(() => {
                 window.location.href = "index.html";
