@@ -1,0 +1,104 @@
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    transition: all 0.3s ease;
+}
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+    position: relative;
+}
+
+/* Language Switch Buttons */
+.lang-switch {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.lang-switch button {
+    background: #ddd;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Input Fields */
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Login/Signup Button */
+#login-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #25D366; /* WhatsApp Green */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+#login-btn:hover {
+    background-color: #128C7E;
+}
+
+/* Toggle Text */
+#toggle-text {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #555;
+}
+
+#signup-link {
+    color: #25D366;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* --- RTL (Urdu) Support --- */
+body.rtl {
+    direction: rtl;
+    font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', Arial, sans-serif;
+}
+
+body.rtl .lang-switch {
+    right: auto;
+    left: 10px;
+}
+
+body.rtl input {
+    text-align: right;
+}
