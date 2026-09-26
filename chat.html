@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="container">
+        <!-- Language Toggle -->
         <div class="lang-switch">
             <button onclick="setLanguage('en')">English</button>
             <button onclick="setLanguage('ur')">اردو</button>
@@ -16,26 +17,83 @@
         <h1 id="app-title">Messages</h1>
         <p>Welcome, <span id="user-email"></span></p>
         
-        <p style="margin-top: 20px; color: #888;">(Yahan aapki doston ki list aayegi)</p>
-        <p style="margin-top: 10px; color: #888;">(Yahan chat messages aayenge)</p>
+        <h3 id="friends-title" style="margin-top: 20px;">Friends List:</h3>
+        <ul id="users-list" style="list-style: none; padding: 0; text-align: left; margin-top: 10px;">
+            <li>Loading...</li>
+        </ul>
 
         <button id="logout-btn" style="margin-top: 20px; background: #e74c3c; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">Logout</button>
     </div>
 
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Aapki Config File -->
     <script src="firebase-config.js"></script>
+
+    <!-- Chat Screen Ka Logic -->
     <script>
-        // User ka email screen par dikhana aur check karna ke login hai ya nahi
+        // 1. Translations Dictionary (Chat Screen ke liye)
+        const chatTranslations = {
+            en: { title: "Messages", welcome: "Welcome", friends: "Friends List", logout: "Logout" },
+            ur: { title: "پیغامات", welcome: "خوش آمدید", friends: "دوستوں کی فہرست", logout: "لاگ آؤٹ" }
+        };
+
+        // 2. Language Change Function
+        function setLanguage(lang) {
+            if (lang === 'ur') document.body.classList.add('rtl');
+            else document.body.classList.remove('rtl');
+
+            document.getElementById('app-title').innerText = chatTranslations[lang].title;
+            document.getElementById('friends-title').innerText = chatTranslations[lang].friends;
+            document.getElementById('logout-btn').innerText = chatTranslations[lang].logout;
+        }
+
+        // 3. Default Language Set Karein
+        setLanguage('en');
+
+        // 4. Authentication Check aur Friends List Load Karna
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
+                // User ka email screen par dikhana
                 document.getElementById('user-email').innerText = user.email;
+
+                // Firestore se saare users nikalna
+                const db = firebase.firestore();
+                db.collection('users').onSnapshot((snapshot) => {
+                    const usersList = document.getElementById('users-list');
+                    usersList.innerHTML = ""; // List clear karein
+
+                    snapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        
+                        // Khud ko list mein na dikhayein
+                        if (userData.email !== user.email) {
+                            const li = document.createElement('li');
+                            li.innerText = userData.email;
+                            li.style.padding = "10px";
+                            li.style.borderBottom = "1px solid #ccc";
+                            li.style.cursor = "pointer";
+                            
+                            // Dost par click karne ka action
+                            li.onclick = () => {
+                                alert("Aapne " + userData.email + " par click kiya! Ab hum chat screen banayenge.");
+                            };
+                            
+                            usersList.appendChild(li);
+                        }
+                    });
+                });
+
             } else {
-                window.location.href = "index.html"; // Agar login nahi, to wapas login screen
+                // Agar login nahi hai, to wapas login screen par bhejein
+                window.location.href = "index.html";
             }
         });
 
-        // Logout ka logic
+        // 5. Logout Logic
         document.getElementById('logout-btn').addEventListener('click', () => {
             firebase.auth().signOut().then(() => {
                 window.location.href = "index.html";
