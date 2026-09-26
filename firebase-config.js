@@ -1,4 +1,3 @@
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyAIfjFZMKhr3pXET3yFPBeWlvQcyRPPYE",
   authDomain: "howi-de267.firebaseapp.com",
@@ -8,5 +7,4 @@ const firebaseConfig = {
   appId: "1:24298888085:web:3a2bc2e72e374d747ef49c"
 };
 
-// Firebase Initialize (Compat version)
 firebase.initializeApp(firebaseConfig);
